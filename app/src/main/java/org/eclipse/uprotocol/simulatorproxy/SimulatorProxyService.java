@@ -30,6 +30,7 @@ import static org.eclipse.uprotocol.common.util.UStatusUtils.toStatus;
 import static org.eclipse.uprotocol.common.util.log.Formatter.join;
 import static org.eclipse.uprotocol.common.util.log.Formatter.status;
 import static org.eclipse.uprotocol.common.util.log.Formatter.stringify;
+import static org.eclipse.uprotocol.v1.UCode.NOT_FOUND;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -249,6 +250,17 @@ public class SimulatorProxyService extends Service {
 
             return logStatus("unregisterListener", status, Key.TOPIC, stringify(topic));
         });
+    }
+
+    public static void sendServiceStartStatus(Socket clientSocket, String serviceName, UCode uCode) {
+        if (clientSocket != null) {
+            Thread sendStatus = new Thread(() -> {
+                sendStatusToHost(clientSocket,
+                        UStatus.newBuilder().setMessage(serviceName).setCode(uCode).build(),
+                        Constants.ACTION_START_SERVICE, "");
+            });
+            sendStatus.start();
+        }
     }
 
     @Override
@@ -555,7 +567,7 @@ public class SimulatorProxyService extends Service {
                 Constants.ENTITY_SOCKET.put(entity, this.clientSocket);
             } else {
                 Log.i(LOG_TAG, "Android service not found for entity: " + entity);
-
+                sendServiceStartStatus(this.clientSocket, entity, NOT_FOUND);
             }
         }
 
