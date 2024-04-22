@@ -99,7 +99,7 @@ public class SimulatorProxyService extends Service {
     static Context context;
     private static USubscription.Stub mUSubscriptionStub;
     private static UPClient mUPClient;
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private ServerSocket serverSocket;
     private Thread serverThread;
 
@@ -240,7 +240,6 @@ public class SimulatorProxyService extends Service {
 
     public static void handleMessage(@NonNull UMessage message) {
         sendTopicUpdateToHost(message);
-
     }
 
     public static @NonNull CompletableFuture<UStatus> unregisterListener(@NonNull UUri topic, UListener listener) {
@@ -254,12 +253,10 @@ public class SimulatorProxyService extends Service {
 
     public static void sendServiceStartStatus(Socket clientSocket, String serviceName, UCode uCode) {
         if (clientSocket != null) {
-            Thread sendStatus = new Thread(() -> {
-                sendStatusToHost(clientSocket,
-                        UStatus.newBuilder().setMessage(serviceName).setCode(uCode).build(),
-                        Constants.ACTION_START_SERVICE, "");
-            });
-            sendStatus.start();
+            mExecutor.execute(() -> sendStatusToHost(clientSocket,
+                    UStatus.newBuilder().setMessage(serviceName).setCode(uCode).build(),
+                    Constants.ACTION_START_SERVICE, ""));
+
         }
     }
 
@@ -561,10 +558,10 @@ public class SimulatorProxyService extends Service {
                  ComponentName componentName = new ComponentName(context, serviceClass);
                  packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
                  **/
+                Constants.ENTITY_SOCKET.put(entity, this.clientSocket);
                 Intent serviceIntent = new Intent(context, serviceClass);
                 ContextCompat.startForegroundService(context, serviceIntent);
                 Log.i(LOG_TAG, "Starting service for entity: " + entity);
-                Constants.ENTITY_SOCKET.put(entity, this.clientSocket);
             } else {
                 Log.i(LOG_TAG, "Android service not found for entity: " + entity);
                 sendServiceStartStatus(this.clientSocket, entity, NOT_FOUND);
