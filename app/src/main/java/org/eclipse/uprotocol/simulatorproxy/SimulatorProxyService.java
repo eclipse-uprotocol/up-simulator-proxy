@@ -393,21 +393,23 @@ public class SimulatorProxyService extends Service {
                     // Handle received data as needed
                     Log.d("SocketServerService", "Received data: " + receivedData);
                     try {
-                        JSONObject jsonObj = new JSONObject(receivedData);
-                        String action = jsonObj.getString("action");
-                        String data = jsonObj.getString("data");
+                        for (String recObject : receivedData.split("\n")) {
+                            JSONObject jsonObj = new JSONObject(recObject);
+                            String action = jsonObj.getString("action");
+                            String data = jsonObj.getString("data");
 
-                        switch (action) {
-                            case Constants.ACTION_PUBLISH -> performSend(data);
-                            case Constants.ACTION_START_SERVICE -> startVehicleService(data);
-                            case Constants.ACTION_SUBSCRIBE -> performSubscribe(data);
-                            case Constants.ACTION_REGISTER_RPC -> performRegisterRPC(data);
-                            case Constants.ACTION_RPC_RESPONSE -> performRpcResponse(data);
-                            case Constants.ACTION_INVOKE_METHOD -> performInvokeMethod(data);
-                            case Constants.ACTION_CREATE_TOPIC ->
-                                    performCreateTopic(data, jsonObj.getJSONArray("topics"));
+                            switch (action) {
+                                case Constants.ACTION_PUBLISH -> performSend(data);
+                                case Constants.ACTION_START_SERVICE -> startVehicleService(data);
+                                case Constants.ACTION_SUBSCRIBE -> performSubscribe(data);
+                                case Constants.ACTION_REGISTER_RPC -> performRegisterRPC(data);
+                                case Constants.ACTION_RPC_RESPONSE -> performRpcResponse(data);
+                                case Constants.ACTION_INVOKE_METHOD -> performInvokeMethod(data);
+                                case Constants.ACTION_CREATE_TOPIC ->
+                                        performCreateTopic(data, jsonObj.getJSONArray("topics"));
 
-                            default -> {
+                                default -> {
+                                }
                             }
                         }
 
