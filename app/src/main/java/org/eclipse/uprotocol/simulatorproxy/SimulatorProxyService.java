@@ -464,7 +464,7 @@ public class SimulatorProxyService extends Service {
                 UMessage message = UMessage.parseFrom(umsgBytes);
                 BaseService serviceClass = Constants.ENTITY_BASESERVICE.get(message.getAttributes().getSource().getEntity().getName());
                 if (serviceClass != null) {
-                   serviceClass.send_response(message);
+                   serviceClass.sendResponse(message);
                 }
 
             } catch (InvalidProtocolBufferException ex) {

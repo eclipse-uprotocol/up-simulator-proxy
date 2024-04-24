@@ -31,6 +31,7 @@ import static org.eclipse.uprotocol.common.util.log.Formatter.stringify;
 import static org.eclipse.uprotocol.simulatorproxy.SimulatorProxyService.LOG_TAG;
 import static org.eclipse.uprotocol.simulatorproxy.SimulatorProxyService.sendServiceStartStatus;
 import static org.eclipse.uprotocol.v1.UCode.ALREADY_EXISTS;
+import static org.eclipse.uprotocol.v1.UCode.INTERNAL;
 import static org.eclipse.uprotocol.v1.UCode.OK;
 
 import android.annotation.SuppressLint;
@@ -117,6 +118,7 @@ public class BaseService extends Service {
                 sendServiceStartStatus(Constants.ENTITY_SOCKET.get(SERVICE.getName()), SERVICE.getName(), OK);
             } else {
                 Log.w(TAG, join(Key.EVENT, "up client unexpectedly disconnected"));
+                sendServiceStartStatus(Constants.ENTITY_SOCKET.get(SERVICE.getName()), SERVICE.getName(), INTERNAL);
             }
         });
         mUSubscriptionStub = USubscription.newStub(mUPClient);
@@ -144,7 +146,7 @@ public class BaseService extends Service {
         return status;
     }
 
-    public UStatus send_response(@NonNull UMessage message) {
+    public UStatus sendResponse(@NonNull UMessage message) {
         final UStatus status = mUPClient.send(message);
         logStatus("successfully send rpc response", status, Key.TOPIC, stringify(message.getAttributes().getSource()));
         return status;
